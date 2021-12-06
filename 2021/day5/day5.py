@@ -29,7 +29,7 @@ for location in coord:
   if yma > ymax:
     ymax = yma
     
-locgrid = np.zeros((xmax-xmin, ymax-ymin))
+locgrid = np.zeros((xmax-xmin+1, ymax-ymin+1))
 
 for loc in coord:
   x1 = int(loc[0][0]) - xmin
@@ -47,15 +47,14 @@ for loc in coord:
   
   if((x1 == x2) | (y1 == y2)):
     locgrid[x1:(x2+1), y1:(y2+1)] += 1
-    print("found one")
-    
+
 total = 0
 for i in np.nditer(locgrid):
   if i>1:
     total += 1
 
     
-locgrid = np.zeros((xmax-xmin, ymax-ymin))
+locgrid = np.zeros((xmax-xmin+1, ymax-ymin+1))
 
 for loc in coord:
   x1 = int(loc[0][0]) - xmin
