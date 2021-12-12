@@ -4,7 +4,8 @@ import itertools
 
 with open('2021/inputs/day12.txt') as f:
     lines = f.readlines()
-    
+
+
     
 def str_find(string, pattern):
   return len(re.findall(pattern, string))>0
@@ -12,35 +13,70 @@ def str_find(string, pattern):
   
 
 lines = [x[0:(len(x)-1)] for x in lines]
-x = np.zeros((len(lines), len(lines[0])))
 
-i = 0
-for line in lines:
-  x[i,:] = [int(y) for y in line]
-  i += 1
+names = [[re.split("-", x)[1], re.split("-", x)[0]] for x in lines]
+names = [item for sublist in names for item in sublist]
+names = set(names)
+names = list(names)
 
-totflash = 0
-for X in range(0, 400):
-  flash = []
-  for i in range(0, len(lines)):
-    for j in range(0, len(lines[0])):
-      x[i,j] = x[i,j] + 1
-      if x[i,j] > 9:
-         flash.append([i,j])
-  flashed = []
-  while (len(flash) > 0):
-    flashed = flashed + flash
-    newflash = []
-    for e in flash:
-      for n in [[e[0]-1,e[1]], [e[0]-1,e[1]-1], [e[0]-1,e[1] + 1], [e[0],e[1]-1], [e[0],e[1] + 1], [e[0]+1,e[1]], [e[0]+1,e[1]-1], [e[0]+1,e[1] + 1]]:
-        if (n[0] >= 0 and n[0] < len(lines) and n[1] >= 0 and n[1] < len(lines[0])):
-          x[n[0], n[1]] += 1
-          if x[n[0], n[1]] > 9 and [n[0],n[1]] not in flashed and [n[0],n[1]] not in newflash:
-            newflash.append([n[0], n[1]])
-    flash = newflash
-  if len(flashed) == len(lines) * len(lines[0]):
-    print(len(flashed))
-    break
-  x[x>=10] = 0
-      
-print(X)
+pathdict ={x:None for x in names}
+
+for l in lines:
+  parts = re.split("-", l)
+  if pathdict[parts[1]] is not None:
+    pathdict[parts[1]].append(parts[0])
+  else:
+    pathdict[parts[1]] = [parts[0]]
+  if pathdict[parts[0]] is not None:
+    pathdict[parts[0]].append(parts[1])
+  else:
+    pathdict[parts[0]] = [parts[1]]
+  
+gateways = []
+
+def pathfinder(location, visited):
+  print(location)
+  visited.append(location)
+  if location == "start":
+    print(visited)
+    gateways.append([visited])
+  else:
+    locations = pathdict[location].copy()
+    nloc = locations.copy()
+    if len(nloc) > 0:
+      for l in locations:
+        if (l.lower() == l and l in visited) or l == "end":
+          nloc.remove(l)
+    if len(nloc) > 0:
+      [pathfinder(l, visited.copy()) for l in nloc]    
+    
+pathfinder("end", [])  
+len(gateways)
+
+## part 2
+
+  
+gateways = []
+
+def pathfinder(location, visited, flag = 0):
+  visited.append(location)
+  if location == "start":
+    gateways.append([visited])
+  else:
+    locations = pathdict[location].copy()
+    nloc = locations.copy()
+    if len(nloc) > 0:
+      for l in locations:
+        if (l.lower() == l and (visited.count(l)>=2 or (flag==1 and visited.count(l)==1))) or l == "end":
+          nloc.remove(l)
+    if len(nloc) > 0:
+      for l in nloc:
+        if l.lower() == l and flag == 0 and visited.count(l)==1:
+          pathfinder(l, visited.copy(), 1)
+        else:
+          pathfinder(l, visited.copy(), flag)
+    
+pathfinder("end", [])  
+len(gateways)
+
+
