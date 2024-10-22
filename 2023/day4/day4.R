@@ -44,4 +44,49 @@ calculate_value <- function(cards_in){
  read_cards("2023/day4/input.txt") %>% 
    calculate_value()
 
+ ## part 2
+ 
+winner_count <- function(row_number, winning, entry){
 
+   winners <- (sum(unlist(entry) %in% unlist(winning)))
+   if (winners == 0) return(list(c())) 
+   return(list(row_number + seq(1, winners)))
+ }
+ 
+
+
+ calculate_value <- function(cards_in){
+   
+   winning_cards <- cards_in %>% 
+     mutate(row = row_number()) %>% 
+     rowwise() %>% 
+     mutate(
+       victory = winner_count(row, winning, entry)
+     ) %>% 
+     ungroup()
+   
+   index <- 1
+   copy_winners <- winning_cards %>% 
+     mutate(multiplier = 1)
+   
+   while(index <= nrow(copy_winners)){
+     new_rows <- unlist( copy_winners[index,]$victory)
+     new_rows <- new_rows[which(new_rows %in% copy_winners$row)]
+     if (length(new_rows) >= 1 ){
+       copy_winners[new_rows,]$multiplier <- copy_winners[new_rows,]$multiplier + copy_winners[index,]$multiplier
+     }
+     index <- index + 1
+   }
+   sum(copy_winners$multiplier)
+   
+   
+ }
+
+
+ 
+ read_cards("2023/day4/test.txt") %>% 
+   calculate_value()
+ 
+ read_cards("2023/day4/input.txt") %>% 
+   calculate_value()
+ 
